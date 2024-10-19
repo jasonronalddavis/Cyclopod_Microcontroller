@@ -2,6 +2,10 @@
 #define _CLOUDSPEECHCLIENT_H
 #include <WiFiClientSecure.h>
 #include "Audio.h"
+#include <WiFiClientSecure.h>
+
+
+
 enum Authentication {
   USE_ACCESSTOKEN,
   USE_APIKEY
@@ -17,7 +21,5 @@ public:
   ~CloudSpeechClient();
   void Transcribe(Audio* audio);
 };
-
-#define MY_APIKEY
 
 #endif // _CLOUDSPEECHCLIENT_H

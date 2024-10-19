@@ -10,9 +10,9 @@
 const char* sSid = "iPhone";
 const char* passWord = "Barnes!!";
 const char* apikeyy = "AIzaSyB_eFvcXt8CfCLd-fMd83Ze0bcwHRBdFFc";  // API key for Google Cloud
-
+I2S i2s(ADMP441);  // Initialize the I2S object with the ADMP441 mic type
 // Initialize I2S object with the appropriate microphone type
-I2S i2s(INMP441);
+
 
 void setup() {
     // Begin serial communication for debugging
@@ -44,7 +44,7 @@ void setup() {
     Serial.println("Initializing Audio...");
 
     // Create the Audio object (linked to the I2S class)
-    Audio* audio = new Audio(INMP441);  // Initialize Audio with microphone type
+    Audio* audio = new Audio(ADMP441);  // Initialize Audio with microphone type
 
     Serial.println("Starting audio recording...");
     audio->Record(i2s);  // Pass I2S object to record audio
@@ -53,19 +53,12 @@ void setup() {
 
     // Initialize the CloudSpeechClient for Google Speech-to-Text API
     Serial.println("Initializing CloudSpeechClient...");
-    CloudSpeechClient* cloudSpeechClient = new CloudSpeechClient(USE_APIKEY);
+    CloudSpeechClient* cloudSpeechClient = new CloudSpeechClient(USE_ACCESSTOKEN);
 
-    // Check if CloudSpeechClient was initialized correctly
-    if (cloudSpeechClient == nullptr) {
-        Serial.println("CloudSpeechClient initialization failed!");
-        delete audio;
-        return;
-    }
-
+  
     // Transcribe the recorded audio
     cloudSpeechClient->Transcribe(audio);
 
-    // Cleanup
     delete cloudSpeechClient;
     delete audio;
 

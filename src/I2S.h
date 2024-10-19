@@ -7,7 +7,6 @@
 #include "esp_system.h"
 
 enum MicType {
-  INMP441,
   ADMP441,
   ICS43434,
   M5GO,

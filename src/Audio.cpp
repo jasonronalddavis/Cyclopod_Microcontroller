@@ -3,9 +3,9 @@
  #include <SD_MMC.h>
  #include <SPIFFS.h>
  #include <FFat.h>
-
 #include "Audio.h"
 #include "I2S.h"
+#include <base64.h>
 
 // Constructor
 Audio::Audio(MicType micType) {
@@ -100,6 +100,7 @@ void Audio::CreateWavHeader(byte* header, int waveDataSize) {
 
 // Function to record audio data using the I2S class
 void Audio::Record(I2S &i2s) {
+    // Create WAV header
     CreateWavHeader(reinterpret_cast<byte*>(paddedHeader), wavDataSize);
 
     size_t bytes_read;
@@ -115,3 +116,20 @@ void Audio::Record(I2S &i2s) {
     Serial.println("Audio recorded successfully.");
 }
 
+
+void Audio::EncodeToBase64() {
+    // Cast paddedHeader to uint8_t* for base64 encoding
+    content = base64::encode(reinterpret_cast<const uint8_t*>(paddedHeader), sizeof(paddedHeader));
+    content.replace("\n", "");  // Remove any newline characters
+
+    // Encode wavData chunks
+    for (int j = 0; j < wavDataSize / dividedWavDataSize; ++j) {
+        String encodedChunk = base64::encode(reinterpret_cast<const uint8_t*>(wavData[j]), dividedWavDataSize);
+        encodedChunk.replace("\n", "");  // Remove newline characters
+        content += encodedChunk;  // Append each chunk to the content
+    }
+
+    // Debugging output to ensure encoding is correct
+    Serial.println("Full Encoded Audio Data:");
+    Serial.println(content);
+}

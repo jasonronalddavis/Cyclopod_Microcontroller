@@ -13,7 +13,7 @@ const char* ssId = "iPhone";
 const char* pasword = "Barnes!!";
 
 // API Key
-const char* apiKey = "AIzaSyB_eFvcXt8CfCLd-fMd83Ze0bcwHRBdFFc";
+const char* apiKeyy = "AIzaSyB_eFvcXt8CfCLd-fMd83Ze0bcwHRBdFFc";
 
 // Google Cloud Speech-to-Text Server
 const char* serVer = "speech.googleapis.com";  // Use the host only, without HTTPS prefix.
@@ -56,93 +56,75 @@ const char* root_Ca =
 
 
 CloudSpeechClient::CloudSpeechClient(Authentication authentication) {
-     this->authentication = authentication;
-    WiFi.begin(ssId, pasword);
-    while (WiFi.status() != WL_CONNECTED) delay(1000);
-    client.setCACert(root_Ca);
-    
-    // Set timeout to 30 seconds
-    client.setTimeout(30000); 
-    
-    if (!client.connect(serVer, 443)) {
-        Serial.println("Connection failed!");
-    }
+
+String ans;
+
+
+  
+  this->authentication = authentication;
+  WiFi.begin(ssId, pasword);
+  while (WiFi.status() != WL_CONNECTED) delay(1000);
+  client.setCACert(root_Ca);
+  if (!client.connect(server, 443)) Serial.println("Connection failed!");
 }
-
-
-
-// Modify PrintHttpBody2 to send data in smaller chunks
-// Send WAV data in smaller, more manageable chunks
-void CloudSpeechClient::PrintHttpBody2(Audio* audio) {
-    String buffer;
-    buffer.reserve(512); // Adjust the buffer size to 512 bytes
-
-    // Encode and buffer the padded header
-    String enc = base64::encode(reinterpret_cast<const uint8_t*>(audio->paddedHeader), sizeof(audio->paddedHeader));
-    enc.replace("\n", "");
-    buffer += enc;
-
-    // Encode and buffer the WAV data in chunks
-    for (int j = 0; j < audio->wavDataSize / audio->dividedWavDataSize; ++j) {
-        enc = base64::encode(reinterpret_cast<const uint8_t*>(audio->wavData[j]), audio->dividedWavDataSize);
-        enc.replace("\n", "");
-        buffer += enc;
-
-        // Send buffer when it reaches 512-byte size
-        if (buffer.length() >= 512) {
-            Serial.println("Sending chunk to server...");
-            client.print(buffer);  // Send the buffer
-            Serial.println("Chunk sent.");
-            buffer = "";           // Clear the buffer for the next chunk
-        }
-    }
-
-    // Send any remaining data in the buffer
-    if (buffer.length() > 0) {
-        Serial.println("Sending last chunk to server...");
-        client.print(buffer);
-        Serial.println("Last chunk sent.");
-    }
-}
-
 
 CloudSpeechClient::~CloudSpeechClient() {
-    // Clean up resources here if necessary
-    Serial.println("CloudSpeechClient Destructor Called");
-    client.stop();  // Close the client connection
+  client.stop();
+  WiFi.disconnect();
+}
+
+void CloudSpeechClient::PrintHttpBody2(Audio* audio) {
+  // Base64 encode the padded header
+    String enc = base64::encode((uint8_t*)audio->paddedHeader, sizeof(audio->paddedHeader));
+    enc.replace("\n", "");  // Remove any newline characters
+    client.print(enc);      // Send encoded header
+
+    // Encode and send each chunk of WAV data
+    char** wavData = audio->wavData;
+    for (int j = 0; j < audio->wavDataSize / audio->dividedWavDataSize; ++j) {
+        enc = base64::encode((uint8_t*)wavData[j], audio->dividedWavDataSize);
+        enc.replace("\n", "");  // Remove any newline characters
+        client.print(enc);      // Send each encoded chunk
+    }
 }
 
 void CloudSpeechClient::Transcribe(Audio* audio) {
-    Serial.println("Transcription started...");
-
-    if (!client.connect(serVer, 443)) {
-        Serial.println("Connection failed!");
-        return;
-    }
-
-    Serial.println("Connected to server");
-
-    // For testing purposes, send "Hello World" to see if the connection works
-    client.print("Hello World");
-    Serial.println("Hello World sent.");
-
-    // Wait for the response
-    unsigned long startTime = millis();
-    while (!client.available()) {
-        if (millis() - startTime > 5000) {  // 5-second timeout
-            Serial.println("No response from server.");
-            return;
-        }
-        delay(100);
-    }
-
+    // Base64-encode the audio data
+    audio->EncodeToBase64();
     String My_Answer = "";
+
+    // Create the body for the request
+    String HttpBody1 = "{\"config\":{\"encoding\":\"LINEAR16\",\"sampleRateHertz\":16000,\"languageCode\":\"en-US\"},\"audio\":{\"content\":\"";
+    String HttpBody3 = "\"}}\r\n\r\n";
+
+    // Calculate the base64-encoded data length
+    int httpBody2Length = (audio->wavDataSize + sizeof(audio->paddedHeader)) * 4 / 3; // 4/3 is from base64 encoding
+    String ContentLength = String(HttpBody1.length() + httpBody2Length + HttpBody3.length());
+
+    // Construct the full HTTP header with the correct content length
+    String fullHttpHeader = String("POST /v1/speech:recognize?key=") + apiKeyy +
+                            " HTTP/1.1\r\nHost: speech.googleapis.com\r\nContent-Type: application/json\r\nContent-Length: " + ContentLength + "\r\n\r\n";
+
+    // Send the HTTP header and body to the server
+    client.print(fullHttpHeader);
+    client.print(HttpBody1);
+    PrintHttpBody2(audio);  // Encode and send the audio data
+    client.print(HttpBody3);
+
+    // Wait for the server response
+    while (!client.available());
+
+    // Read the response
     while (client.available()) {
         char temp = client.read();
         My_Answer += temp;
     }
 
-    Serial.println("Response received");
-    Serial.print("Server Response: ");
-    Serial.println(My_Answer);
+    // Extract the JSON data from the server response
+    int position = My_Answer.indexOf('{');
+    if (position >= 0) {
+        ans = My_Answer.substring(position);
+        Serial.print("JSON Data: ");
+        Serial.println(ans);
+    }
 }

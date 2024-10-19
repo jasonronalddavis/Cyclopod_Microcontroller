@@ -11,7 +11,7 @@ public:
     int dividedWavDataSize;         // Size of each divided chunk of data
     char paddedHeader[44];          // WAV header for the audio file
     char** wavData;                 // Array of pointers for WAV data chunks
-
+    String content;
     // Constructor
     Audio(MicType micType);
 
@@ -20,7 +20,7 @@ public:
 
     // Function to record audio data from I2S
     void Record(I2S &i2s);  // Update the signature to include the I2S reference
-
+    void EncodeToBase64();  
     // Function to create the WAV file header
     void CreateWavHeader(byte* header, int waveDataSize);
 };
