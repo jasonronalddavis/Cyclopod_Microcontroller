@@ -4,15 +4,12 @@
 #include <WiFi.h>
 #include "network_param.h"
 
-
-
-
+// WiFi and API Key configuration
 const char* sSid = "iPhone";
 const char* passWord = "Barnes!!";
 const char* apikeyy = "AIzaSyB_eFvcXt8CfCLd-fMd83Ze0bcwHRBdFFc";  // API key for Google Cloud
-I2S i2s(ADMP441);  // Initialize the I2S object with the ADMP441 mic type
-// Initialize I2S object with the appropriate microphone type
 
+I2S i2s(ADMP441);  // Initialize the I2S object with the ADMP441 mic type
 
 void setup() {
     // Begin serial communication for debugging
@@ -53,12 +50,12 @@ void setup() {
 
     // Initialize the CloudSpeechClient for Google Speech-to-Text API
     Serial.println("Initializing CloudSpeechClient...");
-    CloudSpeechClient* cloudSpeechClient = new CloudSpeechClient(USE_ACCESSTOKEN);
+    CloudSpeechClient* cloudSpeechClient = new CloudSpeechClient(USE_APIKEY);  // Change to USE_APIKEY
 
-  
     // Transcribe the recorded audio
     cloudSpeechClient->Transcribe(audio);
 
+    // Clean up resources
     delete cloudSpeechClient;
     delete audio;
 

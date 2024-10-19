@@ -111,20 +111,19 @@ void CloudSpeechClient::Transcribe(Audio* audio) {
     PrintHttpBody2(audio);  // Encode and send the audio data
     client.print(HttpBody3);
 
-    // Wait for the server response
-    while (!client.available());
-
-    // Read the response
+    // Wait for and capture the response
     while (client.available()) {
         char temp = client.read();
         My_Answer += temp;
     }
 
-    // Extract the JSON data from the server response
+    // Extract JSON data from the response
     int position = My_Answer.indexOf('{');
-    if (position >= 0) {
-        ans = My_Answer.substring(position);
-        Serial.print("JSON Data: ");
+    if (position != -1) {
+        String ans = My_Answer.substring(position);
+        Serial.print("JSON data: ");
         Serial.println(ans);
+    } else {
+        Serial.println("No JSON data found in the response");
     }
 }
