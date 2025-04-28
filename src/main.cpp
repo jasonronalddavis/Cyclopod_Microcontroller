@@ -10,10 +10,10 @@ const char* ssid = "iPhone";
 const char* password = "Barnes!!";
 const char* serverUrl = "https://bright-dragon-1cbd6d.netlify.app/.netlify/functions/transcribe";
 
-// I2S pins for INMP441 microphone
-#define I2S_WS 25    // Word Select (LRCL) pin
-#define I2S_SD 26    // Serial Data (DOUT) pin
-#define I2S_SCK 27   // Serial Clock (BCLK) pin
+// Sample I2S pins for ESP32-S3
+#define I2S_WS 42    // Word Select (LRCL) pin
+#define I2S_SD 41    // Serial Data (DOUT) pin 
+#define I2S_SCK 40   // Serial Clock (BCLK) pin
 
 // Configuration
 #define SAMPLE_RATE 16000
