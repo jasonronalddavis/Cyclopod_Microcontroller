@@ -1,0 +1,28 @@
+{
+  "build": {
+    "core": "arduino",
+    "variant": "esp32s3",
+    "mcu": "esp32s3",
+    "f_cpu": "240000000L",
+    "f_flash": "80000000L",
+    "flash_size": "16MB"
+  },
+  "connectivity": [
+    "wifi",
+    "bluetooth"
+  ],
+  "debug": {
+    "openocd_target": "esp32s3.cfg"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "name": "Freenove ESP32-S3-WROOM CAM",
+  "url": "https://freenove.com/freenove-esp32-s3-wroom-cam-board/",
+  "vendor": "Freenove",
+  "upload": {
+    "maximum_ram_size": 327680,
+    "maximum_size": 16777216,
+    "speed": 460800
+  }
+}

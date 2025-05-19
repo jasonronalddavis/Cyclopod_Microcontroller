@@ -2,6 +2,6 @@
     "files.associations": {
         "new": "cpp"
     },
-    "idf.port": "/dev/tty.usbmodem58760785201",
+    "idf.port": "/dev/tty.wchusbserial58760785201",
     "idf.pythonInstallPath": "/usr/bin/python3"
 }
