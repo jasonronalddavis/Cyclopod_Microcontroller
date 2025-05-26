@@ -4,7 +4,6 @@
 #include <driver/i2s.h>
 
 
-
 // WiFi credentials
 const char* ssid = "iPhone";
 const char* password = "Barnes!!";
