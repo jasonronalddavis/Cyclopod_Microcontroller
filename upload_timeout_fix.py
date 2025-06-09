@@ -1,7 +1,9 @@
 Import("env")
+import time
 
-env.Replace(
-    UPLOADCMD="$PYTHONEXE $UPLOADER --chip esp32s3 --port $UPLOAD_PORT --baud $UPLOAD_SPEED write_flash 0x0 $SOURCE"
-)
+def before_upload(source, target, env):
+    print(">> Waiting 3 seconds before upload to help USB stabilize...")
+    time.sleep(3)
 
-
+env.AddPreAction("upload", before_upload)
+env.Append(UPLOAD_FLAGS=["--before", "default_reset", "--after", "hard_reset"])
